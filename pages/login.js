@@ -7,7 +7,6 @@ import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import jwt_decode from 'jwt-decode';
 import PublicRoute from '../hoc/PublicRoute';
-import Spinner from '../components/Spinner'; // Optional: Spinner component
 
 export default function LoginPage() {
   // State for form inputs
