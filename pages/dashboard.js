@@ -214,7 +214,6 @@ export default function Dashboard() {
   };
 
   return (
-    <ProtectedRoute>
       <div className="p-4">
         <h1 className="text-3xl mb-4 flex items-center">
           <FaChartLine className="mr-2" /> Dashboard
@@ -370,6 +369,10 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }
+
+
+Dashboard.getLayout = function getLayout(page) {
+    return <ProtectedRoute>{page}</ProtectedRoute>;
+  };

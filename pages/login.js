@@ -6,8 +6,9 @@ import { useRouter } from 'next/router';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import jwt_decode from 'jwt-decode';
+import PublicRoute from '../hoc/PublicRoute';
 
-export default function Login() {
+export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const router = useRouter();
@@ -41,7 +42,6 @@ export default function Login() {
       router.push('/dashboard');
     } catch (err) {
       // Handle errors
-      console.log(err)
       setError(
         err.response?.data?.message || 'Login failed. Please try again.'
       );
@@ -91,3 +91,8 @@ export default function Login() {
     </div>
   );
 }
+
+// Wrap the component with PublicRoute
+LoginPage.getLayout = function getLayout(page) {
+  return <PublicRoute>{page}</PublicRoute>;
+};
