@@ -1,0 +1,140 @@
+// components/SugarLevelForm.js
+import { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import TimePicker from 'react-time-picker';
+
+export default function SugarLevelForm({ onAdd }) {
+  const [form, setForm] = useState({
+    level: '',
+    measurement_time: 'before food',
+    date: '',
+    time: 'Morning',
+    customTime: '',
+    helper: '',
+  });
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleTimeChange = (time) => {
+    setForm({ ...form, customTime: time });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Client-side validation for custom time
+    if (form.time === 'Custom' && !form.customTime) {
+      setError('Please provide the custom time');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('/api/sugar-levels/add', form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Sugar level entry added successfully!');
+      setForm({
+        level: '',
+        measurement_time: 'before food',
+        date: '',
+        time: 'Morning',
+        customTime: '',
+        helper: '',
+      });
+      onAdd();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to add entry');
+      toast.error(err.response?.data?.message || 'Failed to add entry');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded shadow mb-4">
+      <h3 className="text-lg mb-2">Add Sugar Level</h3>
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+      <div className="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 mb-2">
+        <input
+          type="number"
+          name="level"
+          placeholder="Sugar Level (mg/dL)"
+          value={form.level}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <select
+          name="measurement_time"
+          value={form.measurement_time}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+          required
+        >
+          <option value="before food">Before Food</option>
+          <option value="after food">After Food</option>
+          <option value="fasting">Fasting</option>
+        </select>
+      </div>
+      <div className="flex flex-col md:flex-row space-x-0 md:space-x-2 space-y-2 md:space-y-0 mb-2">
+        <div className="w-full">
+          <label htmlFor="time" className="block text-sm font-medium text-gray-700">
+            Time of Measurement
+          </label>
+          <select
+            id="time"
+            name="time"
+            value={form.time}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          >
+            <option value="Morning">Morning</option>
+            <option value="Afternoon">Afternoon</option>
+            <option value="Evening">Evening</option>
+            <option value="Night">Night</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </div>
+        {form.time === 'Custom' && (
+          <div className="w-full flex flex-col">
+            <label htmlFor="customTime" className="block text-sm font-medium text-gray-700">
+              Select Time
+            </label>
+            <TimePicker
+              id="customTime"
+              onChange={handleTimeChange}
+              value={form.customTime}
+              disableClock
+              clearIcon={null}
+              className="border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required={form.time === 'Custom'}
+            />
+          </div>
+        )}
+      </div>
+      <input
+        type="text"
+        name="helper"
+        placeholder="Helper's Name (e.g., John)"
+        value={form.helper}
+        onChange={handleChange}
+        className="w-full p-2 border rounded mb-2"
+        aria-label="Helper's Name"
+      />
+      <input
+        type="date"
+        name="date"
+        value={form.date}
+        onChange={handleChange}
+        className="w-full p-2 border rounded mb-2"
+        aria-label="Date of Measurement"
+      />
+      <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+        Add
+      </button>
+    </form>
+  );
+}
